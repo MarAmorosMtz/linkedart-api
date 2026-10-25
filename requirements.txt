@@ -1,0 +1,11 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy[asyncio]>=2.0.35
+asyncpg>=0.29
+alembic>=1.13
+pydantic[email]>=2.8
+pydantic-settings>=2.4
+pwdlib[argon2]>=0.2
+pyjwt>=2.9
+python-multipart>=0.0.9
+phonenumbers>=8.13
