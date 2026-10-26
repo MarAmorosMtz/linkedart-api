@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ifyqXMhlfR6dvL5qWGeVcffbdtEbzJ77zLxcY355nRd0sFaJJvQhZtgu7DfgkmW
+\restrict TIANzMd5hSJe2fkAdTZzbaTrJPMA6oq28miYm3hKChLJdcvo1jbciykrkyxazLg
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -213,7 +213,7 @@ ALTER TABLE public.job_details OWNER TO postgres;
 CREATE TABLE public.locations (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     label character varying(200),
-    addres_line character varying(255),
+    address_line character varying(255),
     city character varying(100),
     state character varying(100),
     country character(2) NOT NULL,
@@ -244,7 +244,7 @@ CREATE TABLE public.opportunities (
     application_deadline timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    location uuid,
+    location_id uuid,
     CONSTRAINT chk_opportunities_dates CHECK (((end_date IS NULL) OR (start_date IS NULL) OR (end_date >= start_date))),
     CONSTRAINT chk_opportunities_type CHECK (((type)::text = ANY ((ARRAY['JOB'::character varying, 'EVENT'::character varying, 'COURSE'::character varying, 'CALL'::character varying])::text[])))
 );
@@ -325,7 +325,7 @@ CREATE TABLE public.organizations (
     banner_image character varying(500),
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    location uuid,
+    location_id uuid,
     CONSTRAINT chk_organizations_type CHECK (((type)::text = ANY ((ARRAY['COMPANY'::character varying, 'GROUP'::character varying, 'INSTITUTION'::character varying, 'NON_PROFIT'::character varying, 'OTHER'::character varying])::text[])))
 );
 
@@ -445,7 +445,7 @@ CREATE TABLE public.profiles (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     name character varying(100) NOT NULL,
-    location uuid
+    location_id uuid
 );
 
 
@@ -587,7 +587,7 @@ COPY public.job_details (opportunity_id, employment_type, workplace_type, salary
 -- Data for Name: locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.locations (id, label, addres_line, city, state, country, latitude, longitude, google_place_id, created_at, updated_at) FROM stdin;
+COPY public.locations (id, label, address_line, city, state, country, latitude, longitude, google_place_id, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -595,7 +595,7 @@ COPY public.locations (id, label, addres_line, city, state, country, latitude, l
 -- Data for Name: opportunities; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.opportunities (id, organization_id, title, type, description, start_date, end_date, application_deadline, created_at, updated_at, location) FROM stdin;
+COPY public.opportunities (id, organization_id, title, type, description, start_date, end_date, application_deadline, created_at, updated_at, location_id) FROM stdin;
 \.
 
 
@@ -635,7 +635,7 @@ COPY public.organization_members (organization_id, user_id, role, created_at) FR
 -- Data for Name: organizations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.organizations (id, name, type, description, website, profile_image, banner_image, created_at, updated_at, location) FROM stdin;
+COPY public.organizations (id, name, type, description, website, profile_image, banner_image, created_at, updated_at, location_id) FROM stdin;
 \.
 
 
@@ -691,7 +691,7 @@ COPY public.profile_skills (user_id, skill_id, level, years_experience, created_
 -- Data for Name: profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.profiles (user_id, bio, description, profile_image, banner_image, created_at, updated_at, name, location) FROM stdin;
+COPY public.profiles (user_id, bio, description, profile_image, banner_image, created_at, updated_at, name, location_id) FROM stdin;
 \.
 
 
@@ -983,6 +983,13 @@ CREATE INDEX comment_media_comment_id_idx ON public.comment_media USING btree (c
 
 
 --
+-- Name: comment_reactions_user_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX comment_reactions_user_id ON public.comment_reactions USING btree (user_id);
+
+
+--
 -- Name: comments_parent_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -994,6 +1001,13 @@ CREATE INDEX comments_parent_id_idx ON public.comments USING btree (parent_id);
 --
 
 CREATE INDEX comments_post_id_created_at_idx ON public.comments USING btree (post_id, created_at DESC);
+
+
+--
+-- Name: comments_user_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX comments_user_id ON public.comments USING btree (user_id);
 
 
 --
@@ -1071,6 +1085,13 @@ CREATE INDEX post_media_post_id_idx ON public.post_media USING btree (post_id);
 --
 
 CREATE INDEX post_mentions_user_id_idx ON public.post_mentions USING btree (user_id);
+
+
+--
+-- Name: post_reactions_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX post_reactions_user_id_idx ON public.post_reactions USING btree (user_id);
 
 
 --
@@ -1238,7 +1259,7 @@ ALTER TABLE ONLY public.job_details
 --
 
 ALTER TABLE ONLY public.opportunities
-    ADD CONSTRAINT fk_opportunities_location FOREIGN KEY (location) REFERENCES public.locations(id);
+    ADD CONSTRAINT fk_opportunities_location FOREIGN KEY (location_id) REFERENCES public.locations(id) ON DELETE SET NULL;
 
 
 --
@@ -1286,7 +1307,7 @@ ALTER TABLE ONLY public.organization_members
 --
 
 ALTER TABLE ONLY public.organizations
-    ADD CONSTRAINT fk_organizations_location FOREIGN KEY (location) REFERENCES public.locations(id);
+    ADD CONSTRAINT fk_organizations_location FOREIGN KEY (location_id) REFERENCES public.locations(id) ON DELETE SET NULL;
 
 
 --
@@ -1374,7 +1395,7 @@ ALTER TABLE ONLY public.posts
 --
 
 ALTER TABLE ONLY public.profiles
-    ADD CONSTRAINT fk_profile_location FOREIGN KEY (location) REFERENCES public.locations(id);
+    ADD CONSTRAINT fk_profile_location FOREIGN KEY (location_id) REFERENCES public.locations(id) ON DELETE SET NULL;
 
 
 --
@@ -1469,5 +1490,5 @@ ALTER TABLE ONLY public.verification_codes
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ifyqXMhlfR6dvL5qWGeVcffbdtEbzJ77zLxcY355nRd0sFaJJvQhZtgu7DfgkmW
+\unrestrict TIANzMd5hSJe2fkAdTZzbaTrJPMA6oq28miYm3hKChLJdcvo1jbciykrkyxazLg
 
