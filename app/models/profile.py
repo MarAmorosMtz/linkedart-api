@@ -14,15 +14,15 @@ class Profile(TimestampMixin, Base):
     __tablename__="profiles"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE", primary_key=True)
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     name: Mapped[str] = mapped_column(String(100))
     bio: Mapped[str | None] = mapped_column(String(160))
     description: Mapped[str | None] = mapped_column(Text)
     profile_image: Mapped[str | None] = mapped_column(String(500))
     banner_image: Mapped[str | None] = mapped_column(String(500))
-    location_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("locations.id", ondelete="SET NULL", index=True)
+    location_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("locations.id", ondelete="SET NULL"), index=True
     )
 
     user: Mapped["User"] = relationship(back_populates="profile")

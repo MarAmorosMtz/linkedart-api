@@ -41,5 +41,5 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint(
             "phone_verified_at IS NULL OR phone_number IS NOT NULL",
             name="verified_phone"
-        )
+        ),
     )
